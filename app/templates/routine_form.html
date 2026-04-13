@@ -1,0 +1,28 @@
+{% extends "authenticated-base.html" %}
+{% block title %}{{ 'Edit' if routine else 'New' }} Routine – Flexify{% endblock %}
+
+{% block subpage_content %}
+<div class="mb-3">
+  <a href="/routines" class="text-decoration-none text-muted small">
+    <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle">arrow_back</span> Back to Routines
+  </a>
+</div>
+
+<div class="card p-4" style="max-width:520px">
+  <h4 class="fw-bold mb-4">{{ 'Edit Routine' if routine else '📋 New Routine' }}</h4>
+  <form method="post" action="{{ '/routines/' + routine.id|string + '/edit' if routine else '/routines/new' }}">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Routine Name *</label>
+      <input type="text" name="name" class="form-control" value="{{ routine.name if routine else '' }}" placeholder="e.g. Push Day, Leg Day…" required autofocus>
+    </div>
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Description</label>
+      <textarea name="description" class="form-control" rows="3" placeholder="What's this routine for?">{{ routine.description if routine else '' }}</textarea>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-flexify">{{ 'Save Changes' if routine else 'Create Routine' }}</button>
+      <a href="/routines" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
