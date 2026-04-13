@@ -23,6 +23,16 @@ class WorkoutRepository:
     def get_workout_by_id(self, workout_id: int) -> Optional[Workout]:
         return self.db.get(Workout, workout_id)
 
+    def get_by_id(self, workout_id: int) -> Optional[Workout]:
+        return self.get_workout_by_id(workout_id)
+
+    def get_by_muscle_group(self, muscle_group: str) -> List[Workout]:
+        return self.db.exec(select(Workout).where(Workout.muscle_group == muscle_group)).all()
+
+    def get_by_name_and_muscle_group(self, name: str, muscle_group: str) -> Optional[Workout]:
+        stmt = select(Workout).where(Workout.name == name, Workout.muscle_group == muscle_group)
+        return self.db.exec(stmt).first()
+
     def create_workout(self, workout: Workout) -> Workout:
         try:
             self.db.add(workout)
@@ -33,6 +43,10 @@ class WorkoutRepository:
             self.db.rollback()
             logger.error(f"Error creating workout: {e}")
             raise
+
+    def create(self, workout_data: dict) -> Workout:
+        workout = Workout.model_validate(workout_data)
+        return self.create_workout(workout)
 
     def update_workout(self, workout_id: int, data: dict) -> Workout:
         workout = self.db.get(Workout, workout_id)
@@ -60,6 +74,32 @@ class WorkoutRepository:
         except Exception as e:
             self.db.rollback()
             raise
+
+    def search(self, query: str = "", muscle_group: str = "", category: str = "") -> List[Workout]:
+        stmt = select(Workout)
+        if query:
+            stmt = stmt.where(Workout.name.ilike(f"%{query}%"))
+        if muscle_group:
+            stmt = stmt.where(Workout.muscle_group == muscle_group)
+        if category:
+            stmt = stmt.where(Workout.category == category)
+        return self.db.exec(stmt).all()
+
+    def delete_unlinked_workouts(self) -> int:
+        linked_workout_ids = self.db.exec(select(RoutineWorkout.workout_id)).all()
+        linked_set = {workout_id for workout_id in linked_workout_ids if workout_id is not None}
+        stmt = select(Workout)
+        if linked_set:
+            stmt = stmt.where(Workout.id.notin_(linked_set))
+
+        to_delete = self.db.exec(stmt).all()
+        count = len(to_delete)
+        for workout in to_delete:
+            self.db.delete(workout)
+
+        if count:
+            self.db.commit()
+        return count
 
     # ─── Routines ───────────────────────────────────────────────────────────
 

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from sqlmodel import Field, SQLModel, Relationship
 from typing import Optional, List
 
@@ -7,6 +8,7 @@ class Workout(SQLModel, table=True):
     name: str = Field(index=True)
     description: str = ""
     muscle_group: str = ""   # e.g. Chest, Legs, Back, Core, Arms, Cardio
+    category: str = Field(default="Strength", index=True)
     difficulty: str = "Beginner"  # Beginner, Intermediate, Advanced
     duration_minutes: int = 30
     equipment: str = "None"
@@ -20,6 +22,7 @@ class Routine(SQLModel, table=True):
     name: str
     description: str = ""
     user_id: int = Field(foreign_key="user.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Relationships
     user: Optional["User"] = Relationship(back_populates="routines")
@@ -32,6 +35,7 @@ class RoutineWorkout(SQLModel, table=True):
     workout_id: int = Field(foreign_key="workout.id")
     sets: int = 3
     reps: int = 10
+    order: int = 0
     notes: str = ""
 
     routine: Optional[Routine] = Relationship(back_populates="routine_workouts")
