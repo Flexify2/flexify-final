@@ -54,7 +54,7 @@ FastAPIStarter
 |    |- utilities
 |    |- views
 |-- tests/
-|-- env.example
+|-- .env
 |-- pyptoject.toml
 |-- README.md
 </pre>
@@ -87,7 +87,7 @@ FastAPIStarter
 
 `views` this contains the route functions used for when this app is responsible for rendering the frontnend UI
 
-> Note that the file env.example provides a default set of configuration values for this application. you **MUST** create a copy of this file named `.env` before launching the app. The preconfigured environment allows a user to have an app that uses a sqlite database for a datastore as well as some other default configurations. The values in this should ideally be modified for production. For more possible variables, check out the `config.py` file
+> This application reads configuration from `.env` before launching. The preconfigured values allow local development with sqlite and should be changed for production. For additional variables, check `config.py`.
 
 ### Ascend ExerciseDB Integration
 
