@@ -80,7 +80,7 @@ class RoutineService:
         routine = self.routine_repo.create(name=name, description=description, user_id=user_id)
         return RoutineResponse(**routine.model_dump())
 
-    def update_routine(self, routine_id: int, name: str, description: str, user_id: int) -> RoutineResponse:
+    def update_routine(self, routine_id: int, name: str, description: str | None, user_id: int) -> RoutineResponse:
         routine = self.routine_repo.get_by_id(routine_id)
         if not routine:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Routine not found")

@@ -61,12 +61,13 @@ class RoutineRepository:
             self.db.rollback()
             raise
 
-    def update(self, routine_id: int, name: str, description: str) -> Routine:
+    def update(self, routine_id: int, name: str, description: str | None = None) -> Routine:
         routine = self.db.get(Routine, routine_id)
         if not routine:
             raise Exception("Routine not found")
         routine.name = name
-        routine.description = description
+        if description is not None:
+            routine.description = description
         try:
             self.db.add(routine)
             self.db.commit()

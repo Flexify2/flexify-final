@@ -69,7 +69,7 @@ async def get_routine(routine_id: int, request: Request, db: SessionDep, user: A
 async def update_routine(routine_id: int, request: Request, db: SessionDep, user: AuthDep, body: RoutineUpdate):
     if not body.name:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Name is required")
-    return _get_service(db).update_routine(routine_id, body.name, body.description or "", user.id)
+    return _get_service(db).update_routine(routine_id, body.name, body.description, user.id)
 
 
 @api_router.delete("/routines/{routine_id}", status_code=status.HTTP_204_NO_CONTENT)
