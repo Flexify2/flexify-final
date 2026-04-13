@@ -1,9 +1,11 @@
-from fastapi import Request, Form, status
+from fastapi import Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from app.dependencies.auth import AuthDep, AdminDep
+
+from app.dependencies.auth import AdminDep, AuthDep
 from app.dependencies.session import SessionDep
-from app.repositories.workout import WorkoutRepository
 from app.models.workout import Workout
+from app.repositories.workout import WorkoutRepository
+from app.services.workout_service import WorkoutService
 from app.utilities.flash import flash
 from . import router, templates
 
@@ -16,21 +18,19 @@ async def workouts_view(
     request: Request,
     user: AuthDep,
     db: SessionDep,
-    muscle_group: str = "",
-    difficulty: str = "",
 ):
-    repo = WorkoutRepository(db)
-    workouts = repo.get_all_workouts(muscle_group=muscle_group, difficulty=difficulty)
+    service = WorkoutService(WorkoutRepository(db))
+    muscle_groups = service.get_distinct_muscle_groups()
+    categories = service.get_distinct_categories()
+    equipments = service.get_distinct_equipments()
     return templates.TemplateResponse(
         request=request,
         name="workouts.html",
         context={
             "user": user,
-            "workouts": workouts,
-            "muscle_groups": MUSCLE_GROUPS,
-            "difficulties": DIFFICULTIES,
-            "selected_muscle": muscle_group,
-            "selected_diff": difficulty,
+            "muscle_groups": muscle_groups,
+            "categories": categories,
+            "equipments": equipments,
         },
     )
 

@@ -3,7 +3,11 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from app.dependencies.auth import AuthDep
 from app.dependencies.session import SessionDep
 from app.repositories.workout import WorkoutRepository
+from app.repositories.routine import RoutineRepository
+from app.services.routine_service import RoutineService
+from app.services.workout_service import WorkoutService
 from app.utilities.flash import flash
+from app.routers.api_workouts import _get_search_service
 from . import router, templates
 
 
@@ -11,12 +15,10 @@ from . import router, templates
 
 @router.get("/routines", response_class=HTMLResponse)
 async def routines_view(request: Request, user: AuthDep, db: SessionDep):
-    repo = WorkoutRepository(db)
-    routines = repo.get_user_routines(user.id)
     return templates.TemplateResponse(
         request=request,
         name="routines.html",
-        context={"user": user, "routines": routines},
+        context={"user": user},
     )
 
 
@@ -56,21 +58,16 @@ async def new_routine_action(
 
 @router.get("/routines/{routine_id}", response_class=HTMLResponse)
 async def routine_detail_view(request: Request, routine_id: int, user: AuthDep, db: SessionDep):
-    repo = WorkoutRepository(db)
-    routine = repo.get_routine_by_id(routine_id)
-    if not routine or routine.user_id != user.id:
+    service = RoutineService(RoutineRepository(db), WorkoutRepository(db), _get_search_service())
+    try:
+        routine = await service.get_routine(routine_id, user.id)
+    except Exception:
         flash(request, "Routine not found", "danger")
         return RedirectResponse(url=request.url_for("routines_view"), status_code=status.HTTP_303_SEE_OTHER)
 
-    routine_workouts = repo.get_routine_workouts(routine_id)
-    # Attach full workout object to each routine_workout
-    rw_with_workouts = []
-    for rw in routine_workouts:
-        workout = repo.get_workout_by_id(rw.workout_id)
-        rw_with_workouts.append({"rw": rw, "workout": workout})
-
-    # All workouts for the "add" dropdown
-    all_workouts = repo.get_all_workouts()
+    workout_service = WorkoutService(WorkoutRepository(db))
+    muscle_groups = workout_service.get_distinct_muscle_groups()
+    categories = workout_service.get_distinct_categories()
 
     return templates.TemplateResponse(
         request=request,
@@ -78,8 +75,8 @@ async def routine_detail_view(request: Request, routine_id: int, user: AuthDep, 
         context={
             "user": user,
             "routine": routine,
-            "rw_with_workouts": rw_with_workouts,
-            "all_workouts": all_workouts,
+            "muscle_groups": muscle_groups,
+            "categories": categories,
         },
     )
 

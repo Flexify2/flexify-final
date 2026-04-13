@@ -106,3 +106,54 @@ class WorkoutService:
 
     def purge_unlinked_local_workouts(self) -> int:
         return self.workout_repo.delete_unlinked_workouts()
+
+    def get_distinct_muscle_groups(self) -> list[str]:
+        return [
+            "abdominals",
+            "abductors",
+            "adductors",
+            "biceps",
+            "calves",
+            "chest",
+            "forearms",
+            "glutes",
+            "hamstrings",
+            "lats",
+            "lower_back",
+            "middle_back",
+            "neck",
+            "quadriceps",
+            "traps",
+            "triceps",
+        ]
+
+    def get_distinct_categories(self) -> list[str]:
+        return [
+            "cardio",
+            "olympic_weightlifting",
+            "plyometrics",
+            "powerlifting",
+            "strength",
+            "stretching",
+            "strongman",
+        ]
+
+    def get_distinct_equipments(self) -> list[str]:
+        return [
+            "assisted",
+            "band",
+            "barbell",
+            "body weight",
+            "cable",
+            "dumbbell",
+            "ez barbell",
+            "kettlebell",
+            "machine",
+            "medicine ball",
+            "other",
+            "resistance band",
+            "smith machine",
+            "stability ball",
+            "trx",
+            "weighted",
+        ]

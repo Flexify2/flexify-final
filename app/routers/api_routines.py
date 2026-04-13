@@ -24,8 +24,7 @@ def _get_service(db: SessionDep) -> RoutineService:
     return RoutineService(RoutineRepository(db), WorkoutRepository(db))
 
 
-@api_router.get("/routines/list", response_model=RoutineListResponse)
-async def list_routines(
+async def _list_routines_impl(
     request: Request,
     db: SessionDep,
     user: AuthDep,
@@ -53,6 +52,34 @@ async def list_routines(
         page=page,
         page_size=page_size,
     )
+
+
+@api_router.get("/routines", response_model=RoutineListResponse)
+async def list_routines(
+    request: Request,
+    db: SessionDep,
+    user: AuthDep,
+    q: str | None = Query(default=None),
+    sort_by: str = Query(default="created_at"),
+    sort_dir: str = Query(default="desc"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=9, ge=1, le=24),
+):
+    return await _list_routines_impl(request, db, user, q, sort_by, sort_dir, page, page_size)
+
+
+@api_router.get("/routines/list", response_model=RoutineListResponse)
+async def list_routines_legacy(
+    request: Request,
+    db: SessionDep,
+    user: AuthDep,
+    q: str | None = Query(default=None),
+    sort_by: str = Query(default="created_at"),
+    sort_dir: str = Query(default="desc"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=9, ge=1, le=24),
+):
+    return await _list_routines_impl(request, db, user, q, sort_by, sort_dir, page, page_size)
 
 
 @api_router.post("/routines", response_model=RoutineResponse, status_code=status.HTTP_201_CREATED)

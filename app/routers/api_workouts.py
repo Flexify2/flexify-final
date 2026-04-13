@@ -7,7 +7,7 @@ from app.config import get_settings
 from app.dependencies.auth import AuthDep
 from app.dependencies.session import SessionDep
 from app.repositories.workout import WorkoutRepository
-from app.schemas.workout import WorkoutResponse, ExternalWorkoutResponse
+from app.schemas.workout import ExternalWorkoutResponse, WorkoutResponse
 from app.services.exercise_search_service import ExerciseSearchService
 from app.services.workout_service import WorkoutService
 from . import api_router
@@ -55,22 +55,6 @@ async def api_get_workouts(
         }
         for w in workouts
     ]
-
-
-@api_router.get("/routines")
-async def api_get_routines(user: AuthDep, db: SessionDep):
-    repo = WorkoutRepository(db)
-    routines = repo.get_user_routines(user.id)
-    result = []
-    for r in routines:
-        rws = repo.get_routine_workouts(r.id)
-        result.append({
-            "id": r.id,
-            "name": r.name,
-            "description": r.description,
-            "workout_count": len(rws),
-        })
-    return result
 
 
 @api_router.get("/workouts/external/search", response_model=list[ExternalWorkoutResponse])
