@@ -1,101 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
-
-{% block external_js %}
-
-{% endblock %}
-
+{% block title %}Login – Flexify{% endblock %}
 
 {% block internal_css %}
 <style>
-    body {
-        background-color: #f8f9fa;
-    }
-
-    .login-container {
-        min-height: 100vh;
-    }
-
-    .login-card {
-        border: none;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .login-image {
-        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        padding: 3rem;
-    }
-
-    .form-section {
-        padding: 3rem;
-    }
-
-    .btn-primary {
-        border-radius: 0.5rem;
-    }
-
-    .form-control {
-        border-radius: 0.5rem;
-    }
+  * { font-family: 'Inter', sans-serif; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .auth-card { background: #fff; border-radius: 1.5rem; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .brand { font-size: 2rem; font-weight: 800; letter-spacing: -1px; color: #0f0c29; }
+  .brand span { color: #7c3aed; }
+  .form-control { border-radius: 0.6rem; padding: 0.65rem 1rem; }
+  .form-control:focus { border-color: #7c3aed; box-shadow: 0 0 0 0.2rem rgba(124,58,237,0.15); }
+  .btn-login { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem; font-weight: 700; font-size: 1rem; width: 100%; }
+  .btn-login:hover { background: linear-gradient(135deg, #6d28d9, #4f46e5); color: #fff; }
 </style>
 {% endblock %}
 
-
 {% block content %}
+<div class="auth-card">
+  <div class="text-center mb-4">
+    <div class="brand">Flex<span>ify</span></div>
+    <p class="text-muted mt-1">Your workout remixer — sign in to get started</p>
+  </div>
 
-<div class="container login-container d-flex align-items-center justify-content-center">
-    <div class="card shadow-lg login-card col-lg-10">
-        <div class="row g-0">
-            <div class="col-lg-6 d-none d-lg-flex login-image">
-                <div class="text-center">
-                    <h2 class="mt-4 fw-bold">Welcome Back</h2>
-                    <p class="lead">Sign in to continue to the app</p>
-                </div>
-            </div>
-            <div class="col-lg-6 bg-white">
-                <div class="form-section">
-                    <h3 class="fw-bold mb-4">Login</h3>
+  {% for message in get_flashed_messages(request) %}
+  <div class="alert alert-{{ message.type }} rounded-3">{{ message.message }}</div>
+  {% endfor %}
 
-                    <form id="loginForm" method="POST">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control form-control-md" id="username" name="username"
-                                required="required">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control form-control-md" id="password" name="password"
-                                required>
-                        </div>
-
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                Sign In
-                            </button>
-
-                    </form>
-                </div>
-
-                <div class="d-grid mb-3">
-                    <a class="btn btn-secondary btn-lg" href="{{url_for('register_view')}}" role="button">
-                        Sign Up
-                    </a>
-                </div>
-
-
-                {% for message in get_flashed_messages(request) %}
-                <div class="alert alert-{{ message.type }}" role="alert">{{ message.message }}</div>
-                {% endfor %}
-            </div>
-        </div>
-
+  <form method="post" action="/login">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Username</label>
+      <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
     </div>
-</div>
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Password</label>
+      <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+    </div>
+    <button type="submit" class="btn btn-login">Sign In</button>
+  </form>
+
+  <p class="text-center mt-4 mb-0 text-muted">
+    No account? <a href="/register" class="text-decoration-none fw-semibold" style="color:#7c3aed">Register here</a>
+  </p>
 </div>
 {% endblock %}

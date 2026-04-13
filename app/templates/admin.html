@@ -1,12 +1,66 @@
 {% extends "authenticated-base.html" %}
-
-{% block external_js %}
-<script src="{{ url_for('static', path='js/app.js')}}"></script>
-{% endblock %}
-
+{% block title %}Admin Dashboard – Flexify{% endblock %}
 
 {% block subpage_content %}
+<div class="mb-4">
+  <h2 class="fw-bold mb-1">Admin Dashboard 🛠️</h2>
+  <p class="text-muted">Manage workouts available on Flexify</p>
+</div>
 
-   I am the admin page
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card p-4 text-center">
+      <div class="fw-bold fs-2" style="color:#7c3aed">{{ workouts|length }}</div>
+      <div class="text-muted">Total Workouts</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <a href="/admin/workouts/new" class="card p-4 text-center text-decoration-none d-block" style="background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border-radius:1rem">
+      <span class="material-symbols-outlined" style="font-size:2rem">add_circle</span>
+      <div class="fw-bold">Add New Workout</div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/workouts" class="card p-4 text-center text-decoration-none d-block">
+      <span class="material-symbols-outlined" style="font-size:2rem;color:#6b7280">fitness_center</span>
+      <div class="fw-semibold text-muted">View All Workouts</div>
+    </a>
+  </div>
+</div>
 
+<div class="card">
+  <div class="card-header bg-transparent fw-bold py-3">All Workouts</div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th><th>Name</th><th>Muscle Group</th><th>Difficulty</th><th>Duration</th><th>Equipment</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in workouts %}
+        <tr>
+          <td class="text-muted small">{{ w.id }}</td>
+          <td class="fw-semibold">{{ w.name }}</td>
+          <td><span class="badge badge-muscle">{{ w.muscle_group }}</span></td>
+          <td><span class="badge badge-diff-{{ w.difficulty }}">{{ w.difficulty }}</span></td>
+          <td>{{ w.duration_minutes }} min</td>
+          <td class="text-muted small">{{ w.equipment }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="/workouts/{{ w.id }}" class="btn btn-outline-secondary btn-sm">View</a>
+              <a href="/admin/workouts/{{ w.id }}/edit" class="btn btn-outline-primary btn-sm">Edit</a>
+              <form method="post" action="/admin/workouts/{{ w.id }}/delete" onsubmit="return confirm('Delete {{ w.name }}?')">
+                <button class="btn btn-outline-danger btn-sm">Del</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No workouts yet. <a href="/admin/workouts/new">Add one!</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

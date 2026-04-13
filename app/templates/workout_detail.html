@@ -1,0 +1,122 @@
+{% extends "authenticated-base.html" %}
+{% block title %}{{ workout.name }} – Flexify{% endblock %}
+
+{% block subpage_content %}
+<div class="mb-3">
+  <a href="/workouts" class="text-decoration-none text-muted small">
+    <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle">arrow_back</span> Back to Workouts
+  </a>
+</div>
+
+<div class="row g-4">
+  <!-- Workout Info -->
+  <div class="col-lg-7">
+    <div class="card p-4">
+      <div class="d-flex gap-2 mb-3">
+        <span class="badge badge-muscle">{{ workout.muscle_group }}</span>
+        <span class="badge badge-diff-{{ workout.difficulty }}">{{ workout.difficulty }}</span>
+      </div>
+      <h2 class="fw-bold">{{ workout.name }}</h2>
+      <p class="text-muted">{{ workout.description }}</p>
+      <hr>
+      <div class="row text-center">
+        <div class="col-4">
+          <div class="fw-bold fs-5">{{ workout.duration_minutes }}</div>
+          <div class="text-muted small">Minutes</div>
+        </div>
+        <div class="col-4">
+          <div class="fw-bold fs-5">{{ workout.muscle_group }}</div>
+          <div class="text-muted small">Target</div>
+        </div>
+        <div class="col-4">
+          <div class="fw-bold fs-5">{{ workout.equipment }}</div>
+          <div class="text-muted small">Equipment</div>
+        </div>
+      </div>
+      {% if user.role == 'admin' %}
+      <div class="d-flex gap-2 mt-4">
+        <a href="/admin/workouts/{{ workout.id }}/edit" class="btn btn-outline-secondary btn-sm">Edit Workout</a>
+        <form method="post" action="/admin/workouts/{{ workout.id }}/delete" onsubmit="return confirm('Delete this workout?')">
+          <button class="btn btn-outline-danger btn-sm">Delete</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Add to Routine -->
+  <div class="col-lg-5">
+    <div class="card p-4">
+      <h5 class="fw-bold mb-3">➕ Add to a Routine</h5>
+      {% if routines %}
+      <form method="post" id="addForm">
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Select Routine</label>
+          <select name="workout_id" id="routineSelect" class="form-select form-select-sm">
+            {% for r in routines %}
+            <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Sets</label>
+            <input type="number" name="sets" class="form-control form-control-sm" value="3" min="1">
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Reps</label>
+            <input type="number" name="reps" class="form-control form-control-sm" value="10" min="1">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold small">Notes (optional)</label>
+          <input type="text" name="notes" class="form-control form-control-sm" placeholder="e.g. Rest 60s between sets">
+        </div>
+        <input type="hidden" name="workout_id" value="{{ workout.id }}">
+        <button type="submit" class="btn btn-flexify btn-sm w-100" id="addBtn">Add to Routine</button>
+      </form>
+      {% else %}
+      <p class="text-muted small">You have no routines yet.</p>
+      <a href="/routines/new" class="btn btn-flexify btn-sm">Create a Routine first</a>
+      {% endif %}
+    </div>
+
+    <div class="card p-4 mt-3">
+      <h5 class="fw-bold mb-2">🔀 Remix Suggestions</h5>
+      <p class="text-muted small">Alternative exercises for the same muscle group:</p>
+      <div id="remixSuggestions"><span class="text-muted small">Loading suggestions…</span></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+  // Fix form action dynamically
+  document.getElementById("addForm").addEventListener("submit", function(e) {
+    const routineId = document.getElementById("routineSelect").value;
+    this.action = `/routines/${routineId}/add-workout`;
+  });
+
+  // Load remix suggestions (same muscle group)
+  fetch('/api/workouts?muscle_group={{ workout.muscle_group }}')
+    .then(r => r.json())
+    .then(data => {
+      const filtered = data.filter(w => w.id !== {{ workout.id }}).slice(0, 4);
+      const el = document.getElementById('remixSuggestions');
+      if (filtered.length === 0) {
+        el.innerHTML = '<span class="text-muted small">No alternatives found.</span>';
+        return;
+      }
+      el.innerHTML = filtered.map(w => `
+        <a href="/workouts/${w.id}" class="d-flex align-items-center gap-2 text-decoration-none text-dark mb-2 p-2 rounded-2" style="background:#f8f9fa">
+          <span class="material-symbols-outlined text-muted" style="font-size:1.2rem">fitness_center</span>
+          <div>
+            <div class="fw-semibold small">${w.name}</div>
+            <div class="text-muted" style="font-size:0.75rem">${w.difficulty} · ${w.duration_minutes} min</div>
+          </div>
+        </a>`).join('');
+    });
+</script>
+{% endblock %}
