@@ -36,15 +36,20 @@
 
 .workout-media-wrap {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: 220px;
   overflow: hidden;
   border-radius: 0.75rem 0.75rem 0 0;
   background: #eef2ff;
 }
 
+.workout-media-card {
+  overflow: hidden;
+}
+
 .workout-thumb-image {
   width: 100%;
   height: 100%;
+  min-height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
@@ -62,8 +67,14 @@
   transform: translateY(1px);
 }
 
+@media (min-width: 1200px) {
+  .workout-media-wrap {
+    height: 240px;
+  }
+}
+
 @media (max-width: 576px) {
   .workout-media-wrap {
-    aspect-ratio: 4 / 3;
+    height: 180px;
   }
 }

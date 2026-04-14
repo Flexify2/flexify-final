@@ -253,7 +253,7 @@ function renderWorkouts(workouts) {
         <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="card h-100 shadow-sm workout-media-card" data-workout-index="${index}">
                 <div class="workout-media-wrap">
-                    <img class="workout-thumb workout-thumb-image" src="${escapeHtml(w.image_url || "https://placehold.co/640x360?text=Exercise")}" alt="${escapeHtml(w.name)} preview">
+                    <img class="workout-thumb-image" loading="lazy" decoding="async" src="${escapeHtml(w.image_url || "https://placehold.co/640x360?text=Exercise")}" alt="${escapeHtml(w.name)} preview">
                 </div>
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${escapeHtml(w.name)}</h5>
