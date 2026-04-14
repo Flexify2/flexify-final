@@ -17,5 +17,7 @@ class Settings(BaseSettings):
     db_additional_overflow:int=10
     db_pool_timeout:int=10
     db_pool_recycle:int=10
+    ascend_rapidapi_key: str | None = None
+    ascend_rapidapi_host: str = "edb-with-videos-and-images-by-ascendapi.p.rapidapi.com"
     
     model_config = SettingsConfigDict(env_file=".env")

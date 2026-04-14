@@ -10,6 +10,8 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     from app.database import create_db_and_tables
+    # Import all models so SQLModel registers them before table creation
+    import app.models  # noqa: F401
     create_db_and_tables()
     yield
 

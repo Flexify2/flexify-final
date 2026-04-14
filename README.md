@@ -54,7 +54,7 @@ FastAPIStarter
 |    |- utilities
 |    |- views
 |-- tests/
-|-- env.example
+|-- .env
 |-- pyptoject.toml
 |-- README.md
 </pre>
@@ -87,7 +87,36 @@ FastAPIStarter
 
 `views` this contains the route functions used for when this app is responsible for rendering the frontnend UI
 
-> Note that the file env.example provides a default set of configuration values for this application. you **MUST** create a copy of this file named `.env` before launching the app. The preconfigured environment allows a user to have an app that uses a sqlite database for a datastore as well as some other default configurations. The values in this should ideally be modified for production. For more possible variables, check out the `config.py` file
+> This application reads configuration from `.env` before launching. The preconfigured values allow local development with sqlite and should be changed for production. For additional variables, check `config.py`.
+
+### Ascend ExerciseDB Integration
+
+This project can optionally use Ascend ExerciseDB (RapidAPI) for external exercise search, previews, and workout remix alternatives.
+
+Add these variables to your `.env`:
+
+```
+ASCEND_RAPIDAPI_KEY="your-rapidapi-key"
+ASCEND_RAPIDAPI_HOST="edb-with-videos-and-images-by-ascendapi.p.rapidapi.com"
+```
+
+When `ASCEND_RAPIDAPI_KEY` is not set, local API flows still work and external-search routes gracefully fall back to local workout data.
+
+### Added API Endpoints
+
+- `GET /api/workouts/external/search`
+- `GET /api/workouts/external/{exercise_id}`
+- `GET /api/workouts/external/{exercise_id}/preview.gif`
+- `GET /api/workouts/{workout_id}/alternatives`
+- `GET /api/routines/list`
+- `POST /api/routines`
+- `GET /api/routines/{routine_id}`
+- `PATCH /api/routines/{routine_id}`
+- `DELETE /api/routines/{routine_id}`
+- `POST /api/routines/{routine_id}/workouts`
+- `POST /api/routines/{routine_id}/workouts/external`
+- `PATCH /api/routines/{routine_id}/workouts/{routine_workout_id}`
+- `DELETE /api/routines/{routine_id}/workouts/{routine_workout_id}`
 
 
 ## Using this in production
