@@ -13,8 +13,17 @@
     color: #fff; transition: all 0.3s; display: flex; flex-direction: column;
   }
   #sidebar.collapsed { margin-left: -255px; }
-  .sidebar-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; color: #fff; text-decoration: none; }
-  .sidebar-logo span { color: #a78bfa; }
+  .sidebar-logo {
+    text-decoration: none;
+  }
+  .sidebar-logo img {
+    width: 97px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
   #sidebar .nav-link {
     color: rgba(255,255,255,0.65); font-weight: 500; border-radius: 0.5rem;
     display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.9rem;
@@ -53,7 +62,9 @@
 
   <!-- Sidebar -->
   <nav id="sidebar" class="p-3 vh-100 position-sticky top-0">
-    <a class="sidebar-logo d-block text-center py-3 mb-3" href="/workouts">Flex<span>ify</span></a>
+    <a class="sidebar-logo py-3 mb-3" href="/workouts" aria-label="Flexify Home">
+      <img src="{{ url_for('static', path='img/flexify-logo-sidebar.png') }}" alt="Flexify" />
+    </a>
 
     <div class="sidebar-section">Main</div>
     <ul class="nav nav-pills flex-column gap-1">
