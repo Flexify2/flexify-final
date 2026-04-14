@@ -1,6 +1,13 @@
 {% extends "authenticated-base.html" %}
 {% block title %}{{ routine.name }} – Flexify{% endblock %}
 
+{% block external_js %}
+<script>
+  const ROUTINE_ID = {{ routine.id }};
+</script>
+<script src="{{ url_for('static', path='js/routine_detail.js')}}?v=20260414"></script>
+{% endblock %}
+
 {% block subpage_content %}
 <div class="mb-3">
   <a href="/routines" class="text-decoration-none text-muted small">
@@ -49,6 +56,18 @@
             </div>
           </div>
           <div class="d-flex gap-2 align-items-center">
+            <button
+              type="button"
+              class="btn btn-outline-warning btn-sm remix-btn"
+              data-rw-id="{{ item.rw.id }}"
+              data-workout-id="{{ item.workout.id }}"
+              data-workout-name="{{ item.workout.name }}"
+              data-sets="{{ item.rw.sets }}"
+              data-reps="{{ item.rw.reps }}"
+              title="Find alternatives for this exercise"
+            >
+              <span class="material-symbols-outlined icon-sm">shuffle</span>
+            </button>
             <a href="/workouts/{{ item.workout.id }}" class="btn btn-outline-secondary btn-sm">
               <span class="material-symbols-outlined" style="font-size:1rem">open_in_new</span>
             </a>
@@ -153,6 +172,26 @@
           <button type="submit" class="btn btn-flexify">Save Changes</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Remix Modal -->
+<div class="modal fade" id="remixModal" tabindex="-1" aria-labelledby="remixModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="remixModalLabel">Remix Exercise</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3">Choose an alternative for <strong id="remixWorkoutName"></strong> with a similar muscle group focus.</p>
+        <div id="remixList" class="d-flex flex-column gap-2">
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
