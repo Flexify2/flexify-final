@@ -6,12 +6,11 @@ async function getUserData(){
 
 function loadTable(users){
     const table = document.querySelector('#result');
-    for(let user of users){
-        table.innerHTML += `<tr>
+    const rows = users.map(user => `<tr>
             <td>${user.id}</td>
             <td>${user.username}</td>
-        </tr>`;
-    }
+        </tr>`).join('');
+    table.innerHTML = rows;
 }
 
 async function main(){

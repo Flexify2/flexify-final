@@ -1,29 +1,17 @@
-from functools import lru_cache
-
 from fastapi import Depends, Query, Request, Response
 from fastapi.responses import Response as RawResponse
 
-from app.config import get_settings
 from app.dependencies.auth import AuthDep
 from app.dependencies.session import SessionDep
 from app.repositories.workout import WorkoutRepository
 from app.schemas.workout import ExternalWorkoutResponse, WorkoutResponse
 from app.services.exercise_search_service import ExerciseSearchService
 from app.services.workout_service import WorkoutService
+from .router_utils import get_search_service
 from . import api_router
 
 
-@lru_cache
-def _get_search_service() -> ExerciseSearchService:
-    settings = get_settings()
-    return ExerciseSearchService(
-        api_key=settings.ascend_rapidapi_key,
-        host=settings.ascend_rapidapi_host,
-        base_url=f"https://{settings.ascend_rapidapi_host}",
-    )
-
-
-def _get_service(db: SessionDep, search_service: ExerciseSearchService = Depends(_get_search_service)) -> WorkoutService:
+def _get_service(db: SessionDep, search_service: ExerciseSearchService = Depends(get_search_service)) -> WorkoutService:
     return WorkoutService(WorkoutRepository(db), search_service)
 
 
@@ -88,7 +76,7 @@ async def external_workout_preview(
     request: Request,
     response: Response,
     user: AuthDep,
-    search_service: ExerciseSearchService = Depends(_get_search_service),
+    search_service: ExerciseSearchService = Depends(get_search_service),
 ):
     response.headers["Cache-Control"] = "private, max-age=300"
     content = await search_service.get_preview_gif(exercise_id, resolution=180)
@@ -103,7 +91,7 @@ async def get_external_workout_detail(
     request: Request,
     response: Response,
     user: AuthDep,
-    search_service: ExerciseSearchService = Depends(_get_search_service),
+    search_service: ExerciseSearchService = Depends(get_search_service),
 ):
     response.headers["Cache-Control"] = "private, max-age=300"
     detail = await search_service.get_exercise_detail(exercise_id)
