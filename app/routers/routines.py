@@ -1,10 +1,31 @@
+from functools import lru_cache
+from datetime import datetime, timezone
+
 from fastapi import Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from app.config import get_settings
 from app.dependencies.auth import AuthDep
 from app.dependencies.session import SessionDep
 from app.repositories.workout import WorkoutRepository
+from app.services.exercise_search_service import ExerciseSearchService
 from app.utilities.flash import flash
 from . import router, templates
+
+
+@lru_cache
+def _get_search_service() -> ExerciseSearchService:
+    settings = get_settings()
+    return ExerciseSearchService(
+        api_key=settings.ascend_rapidapi_key,
+        host=settings.ascend_rapidapi_host,
+        base_url=f"https://{settings.ascend_rapidapi_host}",
+    )
+
+
+def _require_user_id(user: AuthDep) -> int:
+    if user.id is None:
+        raise Exception("User not authenticated")
+    return user.id
 
 
 # ─── List My Routines ────────────────────────────────────────────────────────
@@ -12,8 +33,9 @@ from . import router, templates
 @router.get("/routines", response_class=HTMLResponse)
 async def routines_view(request: Request, user: AuthDep, db: SessionDep):
     repo = WorkoutRepository(db)
-    routines = repo.get_user_routines(user.id)
-    routines = sorted(routines, key=lambda r: getattr(r, "created_at", None), reverse=True)
+    user_id = _require_user_id(user)
+    routines = repo.get_user_routines(user_id)
+    routines = sorted(routines, key=lambda r: getattr(r, "created_at", datetime.min.replace(tzinfo=timezone.utc)), reverse=True)
     return templates.TemplateResponse(
         request=request,
         name="routines.html",
@@ -42,7 +64,7 @@ async def new_routine_action(
 ):
     repo = WorkoutRepository(db)
     try:
-        routine = repo.create_routine(name=name, description=description, user_id=user.id)
+        routine = repo.create_routine(name=name, description=description, user_id=_require_user_id(user))
         flash(request, f"Routine '{routine.name}' created!", "success")
         return RedirectResponse(
             url=request.url_for("routine_detail_view", routine_id=routine.id),
@@ -66,13 +88,26 @@ async def routine_detail_view(request: Request, routine_id: int, user: AuthDep, 
         flash(request, "Routine not found", "danger")
         return RedirectResponse(url=request.url_for("routines_view"), status_code=status.HTTP_303_SEE_OTHER)
 
+    search_service = _get_search_service()
     rw_with_workouts = []
     for rw in repo.get_routine_workouts(routine_id):
         workout = repo.get_workout_by_id(rw.workout_id)
+        if (
+            workout
+            and not workout.image_url
+            and workout.id is not None
+            and search_service.enabled
+        ):
+            results = await search_service.search_exercises(
+                name=workout.name,
+                muscle=workout.muscle_group,
+                exercise_type=workout.category,
+                limit=1,
+            )
+            if results and results[0].image_url:
+                workout = repo.update_workout(workout.id, {"image_url": results[0].image_url})
         if workout:
             rw_with_workouts.append({"rw": rw, "workout": workout})
-
-    all_workouts = repo.get_all_workouts()
 
     return templates.TemplateResponse(
         request=request,
@@ -81,7 +116,6 @@ async def routine_detail_view(request: Request, routine_id: int, user: AuthDep, 
             "user": user,
             "routine": routine,
             "rw_with_workouts": rw_with_workouts,
-            "all_workouts": all_workouts,
         },
     )
 

@@ -1,4 +1,4 @@
-from fastapi import Form, Request, status
+from fastapi import Form, Query, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.dependencies.auth import AdminDep, AuthDep
@@ -18,11 +18,17 @@ async def workouts_view(
     request: Request,
     user: AuthDep,
     db: SessionDep,
+    routine_id: int | None = Query(default=None),
 ):
     service = WorkoutService(WorkoutRepository(db))
     muscle_groups = service.get_distinct_muscle_groups()
     categories = service.get_distinct_categories()
     equipments = service.get_distinct_equipments()
+    preselected_routine_id = None
+    if routine_id is not None:
+        candidate = WorkoutRepository(db).get_routine_by_id(routine_id)
+        if candidate and candidate.user_id == user.id:
+            preselected_routine_id = candidate.id
     return templates.TemplateResponse(
         request=request,
         name="workouts.html",
@@ -31,6 +37,7 @@ async def workouts_view(
             "muscle_groups": muscle_groups,
             "categories": categories,
             "equipments": equipments,
+            "preselected_routine_id": preselected_routine_id,
         },
     )
 
@@ -42,9 +49,7 @@ async def workout_detail_view(request: Request, workout_id: int, user: AuthDep, 
     if not workout:
         flash(request, "Workout not found", "danger")
         return RedirectResponse(url=request.url_for("workouts_view"), status_code=status.HTTP_303_SEE_OTHER)
-    # Also get user routines so they can add from here
-    from app.repositories.workout import WorkoutRepository as WR
-    routines = repo.get_user_routines(user.id)
+    routines = repo.get_user_routines(user.id) if user.id is not None else []
     return templates.TemplateResponse(
         request=request,
         name="workout_detail.html",

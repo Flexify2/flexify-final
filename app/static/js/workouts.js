@@ -294,6 +294,7 @@ async function openAddToRoutineModal(workout) {
 
     const select = document.getElementById("routineSelect");
     const noMsg = document.getElementById("noRoutinesMsg");
+    const preselectedRoutineId = parseInt(document.getElementById("preselectedRoutineId")?.value || "", 10);
 
     if (!userRoutines.length) {
         select.classList.add("d-none");
@@ -302,6 +303,9 @@ async function openAddToRoutineModal(workout) {
         noMsg.classList.add("d-none");
         select.classList.remove("d-none");
         select.innerHTML = userRoutines.map((r) => `<option value="${r.id}">${r.name}</option>`).join("");
+        if (!Number.isNaN(preselectedRoutineId) && userRoutines.some((r) => r.id === preselectedRoutineId)) {
+            select.value = String(preselectedRoutineId);
+        }
     }
 
     addToRoutineModalInstance.show();
@@ -323,6 +327,7 @@ async function addToRoutine() {
             description: workout.description || "",
             muscle_group: workout.muscle_group,
             category: workout.category || "strength",
+            image_url: workout.image_url || null,
             sets,
             reps,
         }),

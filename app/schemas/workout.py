@@ -10,6 +10,7 @@ class WorkoutCreate(SQLModel):
     difficulty: str = "Beginner"
     duration_minutes: int = 30
     equipment: str = "None"
+    image_url: Optional[str] = None
 
 
 class WorkoutResponse(SQLModel):
@@ -21,6 +22,7 @@ class WorkoutResponse(SQLModel):
     difficulty: str = "Beginner"
     duration_minutes: int = 30
     equipment: str = "None"
+    image_url: Optional[str] = None
     source: str = "local"
 
 

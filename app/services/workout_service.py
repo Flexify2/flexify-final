@@ -59,6 +59,7 @@ class WorkoutService:
                 category=workout.category,
                 equipment=workout.equipment,
                 difficulty=workout.difficulty,
+                image_url=workout.image_url,
                 source="local",
             )
             for workout in workouts[:limit]
@@ -90,6 +91,8 @@ class WorkoutService:
             external_workout.muscle_group,
         )
         if existing:
+            if existing.id is not None and external_workout.image_url and not existing.image_url:
+                existing = self.workout_repo.update_workout(existing.id, {"image_url": external_workout.image_url})
             return WorkoutResponse(**existing.model_dump())
 
         created = self.workout_repo.create(
@@ -100,6 +103,7 @@ class WorkoutService:
                 "category": external_workout.category or "Strength",
                 "difficulty": external_workout.difficulty or "Intermediate",
                 "equipment": external_workout.equipment or "Mixed",
+                "image_url": external_workout.image_url,
             }
         )
         return WorkoutResponse(**created.model_dump())

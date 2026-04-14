@@ -1,4 +1,5 @@
 import logging
+from sqlalchemy import text
 from sqlmodel import SQLModel, Session, create_engine
 from app.config import get_settings
 from contextlib import contextmanager
@@ -16,6 +17,20 @@ engine = create_engine(
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
+    _ensure_workout_image_column()
+
+
+def _ensure_workout_image_column():
+    with engine.begin() as conn:
+        dialect = conn.dialect.name
+        if dialect == "sqlite":
+            columns = conn.exec_driver_sql("PRAGMA table_info(workout)").fetchall()
+            column_names = {row[1] for row in columns}
+            if "image_url" not in column_names:
+                conn.exec_driver_sql("ALTER TABLE workout ADD COLUMN image_url VARCHAR")
+            return
+
+        conn.execute(text("ALTER TABLE workout ADD COLUMN IF NOT EXISTS image_url VARCHAR"))
 
 def drop_all():
     SQLModel.metadata.drop_all(bind=engine)

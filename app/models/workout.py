@@ -1,6 +1,9 @@
 from datetime import datetime, timezone
 from sqlmodel import Field, SQLModel, Relationship
-from typing import Optional, List
+from typing import TYPE_CHECKING, Optional, List
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class Workout(SQLModel, table=True):
@@ -12,6 +15,7 @@ class Workout(SQLModel, table=True):
     difficulty: str = "Beginner"  # Beginner, Intermediate, Advanced
     duration_minutes: int = 30
     equipment: str = "None"
+    image_url: Optional[str] = None
 
     # Relationship to RoutineWorkout junction
     routine_workouts: List["RoutineWorkout"] = Relationship(back_populates="workout")

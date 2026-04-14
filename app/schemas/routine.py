@@ -25,6 +25,7 @@ class RoutineExternalWorkoutCreate(SQLModel):
     description: str = ""
     muscle_group: str
     category: str = "Strength"
+    image_url: Optional[str] = None
     sets: int = 3
     reps: int = 10
 

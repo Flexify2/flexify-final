@@ -52,6 +52,7 @@ async def api_get_workouts(
             "difficulty": w.difficulty,
             "duration_minutes": w.duration_minutes,
             "equipment": w.equipment,
+            "image_url": w.image_url,
         }
         for w in workouts
     ]

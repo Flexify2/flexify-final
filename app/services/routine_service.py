@@ -56,11 +56,12 @@ class RoutineService:
         return RoutineDetailResponse(**routine.model_dump(), workouts=workouts)
 
     async def _hydrate_workout_images(self, workouts: list[WorkoutInRoutine]) -> list[WorkoutInRoutine]:
-        if not self.exercise_search_service or not getattr(self.exercise_search_service, "enabled", False):
+        service = self.exercise_search_service
+        if service is None or not getattr(service, "enabled", False):
             return workouts
 
         async def resolve_image(workout: WorkoutInRoutine) -> str | None:
-            results = await self.exercise_search_service.search_exercises(
+            results = await service.search_exercises(
                 name=workout.name,
                 muscle=workout.muscle_group,
                 exercise_type=workout.category,
@@ -111,6 +112,8 @@ class RoutineService:
         current = self.routine_repo.get_workouts_in_routine(routine_id)
         order = len(current)
         rw = self.routine_repo.add_workout(routine_id, workout_id, sets=sets, reps=reps, order=order)
+        if workout.id is None or rw.id is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Routine workout id missing")
         return WorkoutInRoutine(
             id=workout.id,
             routine_workout_id=rw.id,
@@ -118,6 +121,7 @@ class RoutineService:
             description=workout.description,
             muscle_group=workout.muscle_group,
             category=workout.category,
+            image_url=workout.image_url,
             sets=rw.sets,
             reps=rw.reps,
             order=rw.order,
@@ -130,12 +134,17 @@ class RoutineService:
         description: str,
         muscle_group: str,
         category: str,
+        image_url: str | None,
         sets: int,
         reps: int,
         user_id: int,
     ) -> WorkoutInRoutine:
         existing = self.workout_repo.get_by_name_and_muscle_group(name, muscle_group)
         if existing:
+            if existing.id is None:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Workout id missing")
+            if image_url and not existing.image_url:
+                self.workout_repo.update_workout(existing.id, {"image_url": image_url})
             workout_id = existing.id
         else:
             created = self.workout_repo.create(
@@ -146,8 +155,11 @@ class RoutineService:
                     "category": category,
                     "difficulty": "Intermediate",
                     "equipment": "Mixed",
+                    "image_url": image_url,
                 }
             )
+            if created.id is None:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Workout id missing")
             workout_id = created.id
 
         return self.add_workout_to_routine(
@@ -182,6 +194,10 @@ class RoutineService:
 
         rw = self.routine_repo.update_routine_workout(routine_workout_id, sets=sets, reps=reps)
         workout = self.workout_repo.get_by_id(rw.workout_id)
+        if not workout:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workout not found")
+        if workout.id is None or rw.id is None:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Routine workout id missing")
         return WorkoutInRoutine(
             id=workout.id,
             routine_workout_id=rw.id,
@@ -189,6 +205,7 @@ class RoutineService:
             description=workout.description,
             muscle_group=workout.muscle_group,
             category=workout.category,
+            image_url=workout.image_url,
             sets=rw.sets,
             reps=rw.reps,
             order=rw.order,

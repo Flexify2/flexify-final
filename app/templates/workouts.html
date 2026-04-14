@@ -10,6 +10,9 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div>
         <h2 class="fw-bold mb-1">Browse Exercises</h2>
+        {% if preselected_routine_id %}
+        <p class="text-muted small mb-0">Adding to routine #{{ preselected_routine_id }}. You can still choose another routine in the add dialog.</p>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -107,6 +110,7 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="selectedWorkoutPayload">
+        <input type="hidden" id="preselectedRoutineId" value="{{ preselected_routine_id or '' }}">
         <div class="mb-3">
           <label class="form-label fw-semibold">Select Routine</label>
           <select id="routineSelect" class="form-select">
