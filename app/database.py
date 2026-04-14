@@ -18,6 +18,7 @@ engine = create_engine(
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
     _ensure_workout_image_column()
+    _ensure_routine_workout_columns()
 
 
 def _ensure_workout_image_column():
@@ -31,6 +32,22 @@ def _ensure_workout_image_column():
             return
 
         conn.execute(text("ALTER TABLE workout ADD COLUMN IF NOT EXISTS image_url VARCHAR"))
+
+
+def _ensure_routine_workout_columns():
+    with engine.begin() as conn:
+        dialect = conn.dialect.name
+        if dialect == "sqlite":
+            columns = conn.exec_driver_sql("PRAGMA table_info(routineworkout)").fetchall()
+            column_names = {row[1] for row in columns}
+            if "order" not in column_names:
+                conn.exec_driver_sql("ALTER TABLE routineworkout ADD COLUMN " + '"order" INTEGER DEFAULT 0')
+            if "notes" not in column_names:
+                conn.exec_driver_sql("ALTER TABLE routineworkout ADD COLUMN notes VARCHAR DEFAULT ''")
+            return
+
+        conn.execute(text('ALTER TABLE routineworkout ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0'))
+        conn.execute(text("ALTER TABLE routineworkout ADD COLUMN IF NOT EXISTS notes VARCHAR DEFAULT ''"))
 
 def drop_all():
     SQLModel.metadata.drop_all(bind=engine)

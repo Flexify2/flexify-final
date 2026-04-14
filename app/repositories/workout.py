@@ -154,11 +154,21 @@ class WorkoutRepository:
 
     def get_routine_workouts(self, routine_id: int) -> List[RoutineWorkout]:
         return self.db.exec(
-            select(RoutineWorkout).where(RoutineWorkout.routine_id == routine_id)
+            select(RoutineWorkout)
+            .where(RoutineWorkout.routine_id == routine_id)
+            .order_by(RoutineWorkout.order, RoutineWorkout.id)
         ).all()
 
     def add_workout_to_routine(self, routine_id: int, workout_id: int, sets: int, reps: int, notes: str = "") -> RoutineWorkout:
-        rw = RoutineWorkout(routine_id=routine_id, workout_id=workout_id, sets=sets, reps=reps, notes=notes)
+        next_order = len(self.get_routine_workouts(routine_id))
+        rw = RoutineWorkout(
+            routine_id=routine_id,
+            workout_id=workout_id,
+            sets=sets,
+            reps=reps,
+            notes=notes,
+            order=next_order,
+        )
         try:
             self.db.add(rw)
             self.db.commit()

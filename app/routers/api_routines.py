@@ -167,6 +167,7 @@ async def update_routine_workout(
         user_id=user_id,
         sets=body.sets,
         reps=body.reps,
+        order=body.order,
     )
 
 

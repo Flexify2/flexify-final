@@ -95,9 +95,16 @@ class RoutineRepository:
             raise
 
     def add_workout(self, routine_id: int, workout_id: int, sets: int = 3, reps: int = 10, order: int = 0) -> RoutineWorkout:
+        if order <= 0:
+            existing_count = len(
+                self.db.exec(select(RoutineWorkout).where(RoutineWorkout.routine_id == routine_id)).all()
+            )
+            order = existing_count
+
         rw = RoutineWorkout(routine_id=routine_id, workout_id=workout_id, sets=sets, reps=reps, order=order)
         try:
             self.db.add(rw)
+            self._normalize_workout_order(routine_id)
             self.db.commit()
             self.db.refresh(rw)
             return rw
@@ -111,14 +118,33 @@ class RoutineRepository:
         if not rw:
             raise Exception("Routine workout not found")
         try:
+            routine_id = rw.routine_id
             self.db.delete(rw)
+            self._normalize_workout_order(routine_id)
             self.db.commit()
         except Exception as e:
             logger.error("Error removing workout from routine: %s", e)
             self.db.rollback()
             raise
 
-    def update_routine_workout(self, routine_workout_id: int, sets: int | None = None, reps: int | None = None) -> RoutineWorkout:
+    def _normalize_workout_order(self, routine_id: int) -> None:
+        ordered_rows = self.db.exec(
+            select(RoutineWorkout)
+            .where(RoutineWorkout.routine_id == routine_id)
+            .order_by(RoutineWorkout.order, RoutineWorkout.id)
+        ).all()
+
+        for index, row in enumerate(ordered_rows):
+            row.order = index
+            self.db.add(row)
+
+    def update_routine_workout(
+        self,
+        routine_workout_id: int,
+        sets: int | None = None,
+        reps: int | None = None,
+        order: int | None = None,
+    ) -> RoutineWorkout:
         rw = self.db.get(RoutineWorkout, routine_workout_id)
         if not rw:
             raise Exception("Routine workout not found")
@@ -126,8 +152,11 @@ class RoutineRepository:
             rw.sets = sets
         if reps is not None:
             rw.reps = reps
+        if order is not None:
+            rw.order = max(0, order)
         try:
             self.db.add(rw)
+            self._normalize_workout_order(rw.routine_id)
             self.db.commit()
             self.db.refresh(rw)
             return rw
@@ -141,7 +170,7 @@ class RoutineRepository:
             select(RoutineWorkout, Workout)
             .join(Workout, RoutineWorkout.workout_id == Workout.id)
             .where(RoutineWorkout.routine_id == routine_id)
-            .order_by(RoutineWorkout.order)
+            .order_by(RoutineWorkout.order, RoutineWorkout.id)
         )
         rows = self.db.exec(stmt).all()
         result = []

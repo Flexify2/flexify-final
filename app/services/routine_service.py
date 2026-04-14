@@ -185,6 +185,7 @@ class RoutineService:
         user_id: int,
         sets: int | None = None,
         reps: int | None = None,
+        order: int | None = None,
     ) -> WorkoutInRoutine:
         routine = self.routine_repo.get_by_id(routine_id)
         if not routine:
@@ -192,7 +193,12 @@ class RoutineService:
         if routine.user_id != user_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
-        rw = self.routine_repo.update_routine_workout(routine_workout_id, sets=sets, reps=reps)
+        rw = self.routine_repo.update_routine_workout(
+            routine_workout_id,
+            sets=sets,
+            reps=reps,
+            order=order,
+        )
         workout = self.workout_repo.get_by_id(rw.workout_id)
         if not workout:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Workout not found")
