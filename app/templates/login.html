@@ -10,8 +10,7 @@
     display: flex; align-items: center; justify-content: center;
   }
   .auth-card { background: #fff; border-radius: 1.5rem; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-  .brand { font-size: 2rem; font-weight: 800; letter-spacing: -1px; color: #0f0c29; }
-  .brand span { color: #7c3aed; }
+  .brand img { width: min(220px, 70%); height: auto; display: inline-block; }
   .form-control { border-radius: 0.6rem; padding: 0.65rem 1rem; }
   .form-control:focus { border-color: #7c3aed; box-shadow: 0 0 0 0.2rem rgba(124,58,237,0.15); }
   .btn-login { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem; font-weight: 700; font-size: 1rem; width: 100%; }
@@ -22,7 +21,9 @@
 {% block content %}
 <div class="auth-card">
   <div class="text-center mb-4">
-    <div class="brand">Flex<span>ify</span></div>
+    <div class="brand">
+      <img src="{{ url_for('static', path='img/flexify-logo.png') }}" alt="Flexify">
+    </div>
     <p class="text-muted mt-1">Your workout remixer — sign in to get started</p>
   </div>
 
