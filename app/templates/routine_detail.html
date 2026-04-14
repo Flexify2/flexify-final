@@ -16,16 +16,22 @@
 </div>
 
 <div class="row g-4">
-  <div class="col-lg-7">
+  <div class="col-12">
     <div class="card p-4 mb-4">
-      <div class="d-flex justify-content-between align-items-start">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
           <h3 class="fw-bold mb-1">{{ routine.name }}</h3>
           <p class="text-muted mb-0">{{ routine.description if routine.description else 'No description' }}</p>
         </div>
-        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editRoutineModal">
-          <span class="material-symbols-outlined" style="font-size:1rem">edit</span>
-        </button>
+        <div class="d-flex align-items-center gap-2">
+          <a href="/workouts?routine_id={{ routine.id }}" class="btn btn-flexify btn-sm d-inline-flex align-items-center gap-2">
+            <span class="material-symbols-outlined icon-sm">travel_explore</span>
+            Add Workouts to This Routine
+          </a>
+          <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editRoutineModal">
+            <span class="material-symbols-outlined" style="font-size:1rem">edit</span>
+          </button>
+        </div>
       </div>
       <div class="mt-3">
         <span class="badge" style="background:#ede9fe;color:#6d28d9">{{ rw_with_workouts|length }} exercise{{ 's' if rw_with_workouts|length != 1 else '' }}</span>
@@ -90,26 +96,9 @@
     {% else %}
     <div class="text-center py-4 text-muted">
       <span class="material-symbols-outlined" style="font-size:3rem;color:#d1d5db">add_circle</span>
-      <p class="mt-2">No exercises yet. Browse workouts to start building this routine.</p>
+      <p class="mt-2">No exercises yet. Use the Add Workouts button above to start building this routine.</p>
     </div>
     {% endif %}
-  </div>
-
-  <div class="col-lg-5">
-    <div class="card p-4 sticky-top routine-shortcut-card" style="top:1rem">
-      <h5 class="fw-bold mb-2">Add Exercise</h5>
-      <p class="text-muted small mb-3">Browse the full workouts catalog and add exercises directly into this routine with one click.</p>
-      <a href="/workouts?routine_id={{ routine.id }}" class="btn btn-flexify w-100 d-inline-flex align-items-center justify-content-center gap-2">
-        <span class="material-symbols-outlined icon-sm">travel_explore</span>
-        Browse Workouts for This Routine
-      </a>
-      <div class="rounded-3 p-3 mt-3 routine-shortcut-note">
-        <div class="d-flex align-items-start gap-2">
-          <span class="material-symbols-outlined text-muted icon-sm">lightbulb</span>
-          <p class="small mb-0 text-muted">When opened from this shortcut, the Add to Routine dialog preselects <strong>{{ routine.name }}</strong>.</p>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 

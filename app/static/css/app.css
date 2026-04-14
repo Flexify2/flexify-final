@@ -89,15 +89,6 @@
   line-height: 1;
 }
 
-.routine-shortcut-card {
-  border: 1px solid #e5e7eb;
-}
-
-.routine-shortcut-note {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-}
-
 @media (min-width: 1200px) {
   .workout-media-wrap {
     height: 240px;
