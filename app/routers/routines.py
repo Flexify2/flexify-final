@@ -11,10 +11,13 @@ from . import router, templates
 
 @router.get("/routines", response_class=HTMLResponse)
 async def routines_view(request: Request, user: AuthDep, db: SessionDep):
+    repo = WorkoutRepository(db)
+    routines = repo.get_user_routines(user.id)
+    routines = sorted(routines, key=lambda r: getattr(r, "created_at", None), reverse=True)
     return templates.TemplateResponse(
         request=request,
         name="routines.html",
-        context={"user": user},
+        context={"user": user, "routines": routines},
     )
 
 

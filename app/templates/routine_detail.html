@@ -77,7 +77,10 @@
       <form method="post" action="/routines/{{ routine.id }}/add-workout">
         <div class="mb-3">
           <label class="form-label fw-semibold small">Workout</label>
-          <select name="workout_id" class="form-select form-select-sm" id="workoutSelect">
+          <select name="workout_id" class="form-select form-select-sm" id="workoutSelect" {% if not all_workouts %}disabled{% endif %}>
+            {% if not all_workouts %}
+            <option value="">No local exercises available</option>
+            {% endif %}
             {% for w in all_workouts %}
             <option value="{{ w.id }}">{{ w.name }} ({{ w.muscle_group }})</option>
             {% endfor %}
@@ -95,14 +98,21 @@
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold small">Notes</label>
-          <input type="text" name="notes" class="form-control form-control-sm" placeholder="e.g. Rest 60s">
+          <input type="text" name="notes" class="form-control form-control-sm" placeholder="e.g. Rest 60s" {% if not all_workouts %}disabled{% endif %}>
         </div>
-        <button type="submit" class="btn btn-flexify w-100 btn-sm">Add to Routine</button>
+        <button type="submit" class="btn btn-flexify w-100 btn-sm" {% if not all_workouts %}disabled{% endif %}>Add to Routine</button>
       </form>
+
+      {% if not all_workouts %}
+      <div class="alert alert-info small mt-3 mb-0" role="alert">
+        No local exercises are available yet. Open <a href="/workouts" class="alert-link">Browse Workouts</a> to import exercises, then return here to add them.
+      </div>
+      {% endif %}
 
       <hr>
       <h6 class="fw-bold mb-2 text-muted small">QUICK BROWSE</h6>
       <div id="quickBrowse">
+        {% if all_workouts %}
         {% for w in all_workouts[:6] %}
         <div class="d-flex align-items-center gap-2 mb-1 p-1 rounded" style="cursor:pointer"
              onclick="document.getElementById('workoutSelect').value='{{ w.id }}'">
@@ -111,6 +121,9 @@
           <span class="badge badge-diff-{{ w.difficulty }} ms-auto">{{ w.difficulty }}</span>
         </div>
         {% endfor %}
+        {% else %}
+        <p class="text-muted small mb-0">Quick browse is available after exercises are imported.</p>
+        {% endif %}
       </div>
     </div>
   </div>
