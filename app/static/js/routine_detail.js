@@ -332,47 +332,51 @@ function initDragAndDrop() {
     cards.forEach((card) => {
         card.addEventListener("dragstart", (e) => {
             draggedCard = card;
-            card.style.opacity = "0.5";
+            card.classList.add("dragging");
             e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/html", card.innerHTML);
         });
 
         card.addEventListener("dragend", () => {
-            card.style.opacity = "1";
+            if (draggedCard) {
+                draggedCard.classList.remove("dragging");
+            }
             cards.forEach((c) => c.classList.remove("drag-over"));
             draggedCard = null;
         });
 
         card.addEventListener("dragover", (e) => {
-            if (draggedCard && draggedCard !== card) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                card.classList.add("drag-over");
+            if (!draggedCard || draggedCard === card) {
+                return;
+            }
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+
+            const allCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
+            const draggedIndex = allCards.indexOf(draggedCard);
+            const targetIndex = allCards.indexOf(card);
+
+            card.classList.remove("drag-over");
+            if (draggedIndex < targetIndex) {
+                card.classList.add("drag-over-after");
+                card.classList.remove("drag-over-before");
+            } else {
+                card.classList.add("drag-over-before");
+                card.classList.remove("drag-over-after");
             }
         });
 
         card.addEventListener("dragleave", () => {
-            card.classList.remove("drag-over");
+            card.classList.remove("drag-over-before", "drag-over-after");
         });
 
         card.addEventListener("drop", async (e) => {
             e.preventDefault();
-            card.classList.remove("drag-over");
+            cards.forEach((c) => c.classList.remove("drag-over-before", "drag-over-after"));
 
             if (!draggedCard || draggedCard === card) {
                 return;
             }
 
-            const draggedId = parseInt(draggedCard.dataset.rwId, 10);
-            const targetId = parseInt(card.dataset.rwId, 10);
-            const draggedOrder = parseInt(draggedCard.dataset.order, 10);
-            const targetOrder = parseInt(card.dataset.order, 10);
-
-            if (!draggedId || !targetId) {
-                return;
-            }
-
-            // Reorder: swap positions or insert
             const allCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
             const draggedIndex = allCards.indexOf(draggedCard);
             const targetIndex = allCards.indexOf(card);
@@ -383,18 +387,15 @@ function initDragAndDrop() {
                 card.parentNode.insertBefore(draggedCard, card);
             }
 
-            // Reassign orders and persist to API
             const updatedCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
             try {
                 for (let i = 0; i < updatedCards.length; i++) {
-                    const newOrder = i;
                     const rwId = parseInt(updatedCards[i].dataset.rwId, 10);
                     if (rwId) {
-                        await updateWorkoutOrder(rwId, newOrder);
-                        updatedCards[i].dataset.order = String(newOrder);
+                        await updateWorkoutOrder(rwId, i);
+                        updatedCards[i].dataset.order = String(i);
                     }
                 }
-                showToast("Reordered", "Exercises have been reordered.");
             } catch (_) {
                 showToast("Error", "Could not reorder exercises. Please try again.", "danger");
                 window.location.reload();

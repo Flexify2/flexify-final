@@ -73,7 +73,7 @@
           <div class="d-flex gap-2 align-items-center">
             <button
               type="button"
-              class="btn btn-outline-warning btn-sm remix-btn"
+              class="btn btn-remix btn-sm remix-btn"
               data-rw-id="{{ item.rw.id }}"
               data-workout-id="{{ item.workout.id }}"
               data-workout-name="{{ item.workout.name }}"
@@ -82,6 +82,7 @@
               title="Find alternatives for this exercise"
             >
               <span class="material-symbols-outlined icon-sm">shuffle</span>
+              Remix
             </button>
             <a href="/workouts/{{ item.workout.id }}" class="btn btn-outline-secondary btn-sm">
               <span class="material-symbols-outlined" style="font-size:1rem">open_in_new</span>
