@@ -323,9 +323,7 @@ let draggedCard = null;
 
 function initDragAndDrop() {
     const list = document.getElementById("routine-exercises-list");
-    if (!list) {
-        return;
-    }
+    if (!list) return;
 
     const cards = list.querySelectorAll(".routine-exercise-card");
 
@@ -337,32 +335,22 @@ function initDragAndDrop() {
         });
 
         card.addEventListener("dragend", () => {
-            if (draggedCard) {
-                draggedCard.classList.remove("dragging");
-            }
-            cards.forEach((c) => c.classList.remove("drag-over"));
+            draggedCard?.classList.remove("dragging");
+            cards.forEach((c) => c.classList.remove("drag-over-before", "drag-over-after"));
             draggedCard = null;
         });
 
         card.addEventListener("dragover", (e) => {
-            if (!draggedCard || draggedCard === card) {
-                return;
-            }
+            if (!draggedCard || draggedCard === card) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
 
-            const allCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
+            const allCards = Array.from(list.children);
             const draggedIndex = allCards.indexOf(draggedCard);
             const targetIndex = allCards.indexOf(card);
 
-            card.classList.remove("drag-over");
-            if (draggedIndex < targetIndex) {
-                card.classList.add("drag-over-after");
-                card.classList.remove("drag-over-before");
-            } else {
-                card.classList.add("drag-over-before");
-                card.classList.remove("drag-over-after");
-            }
+            card.classList.remove("drag-over-before", "drag-over-after");
+            card.classList.add(draggedIndex < targetIndex ? "drag-over-after" : "drag-over-before");
         });
 
         card.addEventListener("dragleave", () => {
@@ -373,11 +361,9 @@ function initDragAndDrop() {
             e.preventDefault();
             cards.forEach((c) => c.classList.remove("drag-over-before", "drag-over-after"));
 
-            if (!draggedCard || draggedCard === card) {
-                return;
-            }
+            if (!draggedCard || draggedCard === card) return;
 
-            const allCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
+            const allCards = Array.from(list.children);
             const draggedIndex = allCards.indexOf(draggedCard);
             const targetIndex = allCards.indexOf(card);
 
@@ -387,7 +373,7 @@ function initDragAndDrop() {
                 card.parentNode.insertBefore(draggedCard, card);
             }
 
-            const updatedCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
+            const updatedCards = Array.from(list.children);
             try {
                 for (let i = 0; i < updatedCards.length; i++) {
                     const rwId = parseInt(updatedCards[i].dataset.rwId, 10);
