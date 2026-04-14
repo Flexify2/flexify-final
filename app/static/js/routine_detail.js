@@ -305,6 +305,104 @@ async function openRemix(button) {
     }
 }
 
+async function updateWorkoutOrder(routineWorkoutId, newOrder) {
+    const res = await fetch(`/api/routines/${ROUTINE_ID}/workouts/${routineWorkoutId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: newOrder }),
+    });
+
+    if (!res.ok) {
+        throw new Error("Could not update workout order");
+    }
+
+    return res.json();
+}
+
+let draggedCard = null;
+
+function initDragAndDrop() {
+    const list = document.getElementById("routine-exercises-list");
+    if (!list) {
+        return;
+    }
+
+    const cards = list.querySelectorAll(".routine-exercise-card");
+
+    cards.forEach((card) => {
+        card.addEventListener("dragstart", (e) => {
+            draggedCard = card;
+            card.style.opacity = "0.5";
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/html", card.innerHTML);
+        });
+
+        card.addEventListener("dragend", () => {
+            card.style.opacity = "1";
+            cards.forEach((c) => c.classList.remove("drag-over"));
+            draggedCard = null;
+        });
+
+        card.addEventListener("dragover", (e) => {
+            if (draggedCard && draggedCard !== card) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                card.classList.add("drag-over");
+            }
+        });
+
+        card.addEventListener("dragleave", () => {
+            card.classList.remove("drag-over");
+        });
+
+        card.addEventListener("drop", async (e) => {
+            e.preventDefault();
+            card.classList.remove("drag-over");
+
+            if (!draggedCard || draggedCard === card) {
+                return;
+            }
+
+            const draggedId = parseInt(draggedCard.dataset.rwId, 10);
+            const targetId = parseInt(card.dataset.rwId, 10);
+            const draggedOrder = parseInt(draggedCard.dataset.order, 10);
+            const targetOrder = parseInt(card.dataset.order, 10);
+
+            if (!draggedId || !targetId) {
+                return;
+            }
+
+            // Reorder: swap positions or insert
+            const allCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
+            const draggedIndex = allCards.indexOf(draggedCard);
+            const targetIndex = allCards.indexOf(card);
+
+            if (draggedIndex < targetIndex) {
+                card.parentNode.insertBefore(draggedCard, card.nextSibling);
+            } else {
+                card.parentNode.insertBefore(draggedCard, card);
+            }
+
+            // Reassign orders and persist to API
+            const updatedCards = Array.from(list.querySelectorAll(".routine-exercise-card"));
+            try {
+                for (let i = 0; i < updatedCards.length; i++) {
+                    const newOrder = i;
+                    const rwId = parseInt(updatedCards[i].dataset.rwId, 10);
+                    if (rwId) {
+                        await updateWorkoutOrder(rwId, newOrder);
+                        updatedCards[i].dataset.order = String(newOrder);
+                    }
+                }
+                showToast("Reordered", "Exercises have been reordered.");
+            } catch (_) {
+                showToast("Error", "Could not reorder exercises. Please try again.", "danger");
+                window.location.reload();
+            }
+        });
+    });
+}
+
 function main() {
     const remixModalEl = document.getElementById("remixModal");
     const detailsModalEl = document.getElementById("alternativeDetailsModal");
@@ -318,6 +416,8 @@ function main() {
     document.querySelectorAll(".remix-btn").forEach((btn) => {
         btn.addEventListener("click", () => openRemix(btn));
     });
+
+    initDragAndDrop();
 }
 
 main();

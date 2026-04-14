@@ -40,11 +40,14 @@
 
     <h5 class="fw-bold mb-3">Exercises</h5>
     {% if rw_with_workouts %}
-    <div class="d-flex flex-column gap-3">
+    <div class="d-flex flex-column gap-3" id="routine-exercises-list">
       {% for item in rw_with_workouts %}
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-start">
-          <div class="d-flex gap-3 align-items-center">
+      <div class="card p-3 routine-exercise-card" draggable="true" data-rw-id="{{ item.rw.id }}" data-order="{{ item.rw.order }}">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div class="d-flex gap-3 align-items-center flex-grow-1">
+            <div class="drag-handle" title="Drag to reorder">
+              <span class="material-symbols-outlined">drag_handle</span>
+            </div>
             <div class="routine-exercise-thumb-wrap rounded-3 d-flex align-items-center justify-content-center">
               {% if item.workout.image_url %}
               <img
