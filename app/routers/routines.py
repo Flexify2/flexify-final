@@ -9,6 +9,10 @@ from app.services.workout_service import WorkoutService
 from app.utilities.flash import flash
 from app.routers.api_workouts import _get_search_service
 from . import router, templates
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 # ─── List My Routines ────────────────────────────────────────────────────────
@@ -68,17 +72,24 @@ async def routine_detail_view(request: Request, routine_id: int, user: AuthDep, 
     workout_service = WorkoutService(WorkoutRepository(db))
     muscle_groups = workout_service.get_distinct_muscle_groups()
     categories = workout_service.get_distinct_categories()
-
-    return templates.TemplateResponse(
-        request=request,
-        name="routine_detail.html",
-        context={
-            "user": user,
-            "routine": routine,
-            "muscle_groups": muscle_groups,
-            "categories": categories,
-        },
-    )
+    try:
+        response = templates.TemplateResponse(
+            request=request,
+            name="routine_detail.html",
+            context={
+                "user": user,
+                "routine": routine,
+                "muscle_groups": muscle_groups,
+                "categories": categories,
+            },
+        )
+        # Force render here so template errors can be handled gracefully.
+        _ = response.body
+        return response
+    except Exception:
+        logger.exception("Failed to render routine detail template", extra={"routine_id": routine_id, "user_id": user.id})
+        flash(request, "Could not render this routine right now. Please try again.", "danger")
+        return RedirectResponse(url=request.url_for("routines_view"), status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/routines/{routine_id}/edit", response_class=HTMLResponse)

@@ -25,6 +25,7 @@ class ExerciseSearchService:
         self.cache_max_entries = cache_max_entries
         self._search_cache: dict[tuple[str, str, str, str, str, int], tuple[float, list[ExternalWorkoutResponse]]] = {}
         self._detail_cache: dict[str, tuple[float, dict]] = {}
+        self._logged_disabled_warning = False
 
     @property
     def enabled(self) -> bool:
@@ -41,6 +42,9 @@ class ExerciseSearchService:
         limit: int = 10,
     ) -> list[ExternalWorkoutResponse]:
         if not self.enabled:
+            if not self._logged_disabled_warning:
+                logger.warning("Ascend external search disabled because ASCEND_RAPIDAPI_KEY is not configured")
+                self._logged_disabled_warning = True
             return []
 
         now = time.time()

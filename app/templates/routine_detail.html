@@ -22,7 +22,8 @@
                         <span class="material-symbols-outlined icon-sm">edit</span>
                     </button>
                 </div>
-                <p class="mt-2 mb-0 text-white-50" id="routineCountText">{{ routine.workouts | length }} exercise{{ 's' if routine.workouts | length != 1 }} ready to train.</p>
+                {% set workout_count = routine.workouts | default([], true) | length %}
+                <p class="mt-2 mb-0 text-white-50" id="routineCountText">{{ workout_count }} exercise{{ 's' if workout_count != 1 else '' }} ready to train.</p>
             </div>
             <button class="btn btn-light btn-lg routine-action-btn" data-bs-toggle="modal" data-bs-target="#addWorkoutModal">
                 <span class="material-symbols-outlined me-1 icon-inline-middle">add</span>
@@ -50,8 +51,8 @@
                                         <span class="badge bg-primary">{{ w.muscle_group }}</span>
                                         <span class="badge bg-secondary">{{ w.category }}</span>
                                     </div>
-                                    {% set workout_description = w.description | default('') | trim %}
-                                    {% if workout_description and not workout_description.startswith('Imported from') %}
+                                    {% set workout_description = (w.description or '') | trim %}
+                                    {% if workout_description and workout_description[:13] != 'Imported from' %}
                                     <p class="card-text text-muted small mb-3">{{ workout_description }}</p>
                                     {% endif %}
                                     <div class="d-flex align-items-center gap-3 flex-wrap">
