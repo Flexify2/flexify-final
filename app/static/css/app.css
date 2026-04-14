@@ -18,3 +18,52 @@
   color: #fff; border: none; border-radius: 0.6rem; font-weight: 600;
 }
 .btn-flexify:hover { background: linear-gradient(135deg, #6d28d9, #4f46e5); color: #fff; }
+
+.icon-sm {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.icon-lg {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.icon-inline-middle {
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.workout-media-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: #eef2ff;
+}
+
+.workout-thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.add-btn .material-symbols-outlined {
+  line-height: 1;
+  transform: translateY(1px);
+}
+
+@media (max-width: 576px) {
+  .workout-media-wrap {
+    aspect-ratio: 4 / 3;
+  }
+}

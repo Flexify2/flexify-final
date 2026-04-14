@@ -1,6 +1,7 @@
 let currentSearchResults = [];
 const searchCache = new Map();
 let detailsModalInstance = null;
+let addToRoutineModalInstance = null;
 
 function escapeHtml(text) {
     return String(text || "")
@@ -303,8 +304,7 @@ async function openAddToRoutineModal(workout) {
         select.innerHTML = userRoutines.map((r) => `<option value="${r.id}">${r.name}</option>`).join("");
     }
 
-    const modal = new bootstrap.Modal(document.getElementById("addToRoutineModal"));
-    modal.show();
+    addToRoutineModalInstance.show();
 }
 
 async function addToRoutine() {
@@ -329,7 +329,7 @@ async function addToRoutine() {
     });
 
     if (res.ok) {
-        bootstrap.Modal.getInstance(document.getElementById("addToRoutineModal")).hide();
+        addToRoutineModalInstance.hide();
         showToast("Success", "Exercise added to routine!", "success");
     } else {
         const err = await res.json();
@@ -347,6 +347,7 @@ function showToast(title, message, type = "success") {
 
 async function main() {
     detailsModalInstance = new bootstrap.Modal(document.getElementById("exerciseDetailsModal"));
+    addToRoutineModalInstance = new bootstrap.Modal(document.getElementById("addToRoutineModal"));
     await runSearch();
 
     document.getElementById("searchBtn").addEventListener("click", async () => {
