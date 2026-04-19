@@ -1,134 +1,46 @@
-# FastAPIStarter
+# Flexify
+![Static Badge](https://img.shields.io/badge/Hosted_on-Render_Free-purple?logo=render&logoSize=auto&link=https%3A%2F%2Fflexify-dcz4.onrender.com%2F)
 
-A FastAPI template for info2602 students based on the [fullstack fastapi template](https://github.com/fastapi/full-stack-fastapi-template) with a few modifications to make it a layered architecture that combines the best of MVC and service repository pattern. This codebase is structured to reduce the repeatibility of code [(the DRY principle)](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) as it was demonstrated in class that code is usually repeated when implementing functionality for a CLI app, a headless API, and a fullstack app. When writing software at scale, deduplicating code is important as it makes the codebase easier to maintain, test and scale.
+Flexify is a full-stack web application designed for fitness enthusiasts who want to plan and manage their workout routines effectively. The application provides an intuitive interface for creating custom routines, adding workouts, and exploring alternatives powered by a comprehensive exercise database.
 
-Additionally, this codebase follows an API-first, modern AJAX flow (similar to Lab 8). In essence, this can be summarized as follows. 
+### Core Features
 
-1. If we want to have this backend web application render the UI as well, we can implement our **VIEWS** that return our user interface.
-2. A small javascript script (`utils.js`) intercepts default form submissions and instead sends an appropriate endpoint to our **api** endpoints
+Flexify's functionality centers around four main capabilities:
 
-The main advantage of this application structure are plenty:
-1. We don't have to implement a jinja based frontend for the application. We can simply implement api endpoints like we did in labs 1-4 
-2. We can implement a backend API for a mobile / desktop application (where the view logic resides in java/kotlin/flutter etc)
-3. We can implement a backend API that uses a separate frontend like Vue, React, Next, Nuxt etc.
-4. We can export the list of endpoints and have other services (like AI agents) consume them 
-5. We can implement an app that functions purely from the CLI
+1. **Browse Workouts** - Explore a vast collection of exercises sourced from the AscendAPI ExerciseDB, complete with descriptions, images, and demonstration videos.
+2. **Create Routines** - Build personalized workout routines tailored to your fitness goals and preferences.
+3. **Add Workouts to Routines** - Seamlessly add exercises to your custom routines with full control over sets, reps, and weight.
+4. **View & Edit Routines** - Manage your routines with the ability to update exercises, adjust parameters, and refine your workout plans.
 
+## Technology Stack
 
-## What is the Model View Controller (MVC) pattern?
+### Backend Framework: FastAPI
 
-The MVC pattern is a code pattern that is used to organise the modules of a project and when applied to a project, it usually works as follows:
+Flexify leverages **FastAPI**, a modern, high-performance Python web framework built on top of Starlette and Pydantic. FastAPI enables rapid development with automatic API documentation, built-in validation, and asynchronous request handling—making it ideal for building scalable RESTful APIs.
 
-- **Models** are your SQLModel/SQLAlchemy classes (The classes that become database tables)
-- **Controllers** are utility functions used to mutate models and/or perform business logic
-- **Views** bind controllers to http routes passing along any user parameters from the request to the controller
+### External API: AscendAPI ExerciseDB
 
+The application integrates with **[AscendAPI's ExerciseDB](https://docs.ascendapi.com/products/edb-v2/overview)**, a comprehensive exercise database that provides:
 
-## What is the Service repository pattern?
+- **Extensive Exercise Library** - Access to thousands of exercises across multiple categories and muscle groups
+- **Rich Media** - Each exercise includes high-quality images and instructional videos demonstrating proper form
+- **Exercise Metadata** - Detailed information including target muscles, equipment needed, and difficulty levels
+- **Search & Discovery** - Powerful search capabilities to find specific exercises by name, muscle group, or equipment
 
-The Service Repository pattern is designed to keep business logic separate from the data access and it aims to separate the codebase into distinct layers.
+The AscendAPI integration allows Flexify to offer users a professional-grade exercise database without requiring manual curation. When the API key is configured, users can search for external exercises and discover workout alternatives.
 
-- **The Repository Layer** acts as a mediator between the application and the data source (the database, files, etc)
-- **The Service Layer** sits between the controller and the repository and this is where business logic lives.
+**Configuration**: Add your AscendAPI credentials to the `.env` file:<br>
+- `ASCEND_RAPIDAPI_KEY`="your-rapidapi-key"<br>
+- `ASCEND_RAPIDAPI_HOST`="edb-with-videos-and-images-by-ascendapi.p.rapidapi.com"
 
+## Architecture Overview
 
-The job of the **repository layer** is to handle ***CRUD*** operations on a model. It doesn't care about the rules at the business logic layer, it's only concerned about how to get and manipulate data. 
+- **Models** - SQLModel classes defining database tables for users, routines, workouts, and routine-workout relationships
+- **Repositories** - Data access layer handling CRUD operations on the database
+- **Services** - Business logic layer enforcing rules, validation, and authorization
+- **API Endpoints** - RESTful routes that accept user requests and delegate to services
 
-The job of the **service layer** is to handle the **RULES** of the application. This is where the business logic comes in such as checking to see if a user's authorized to access the data.
+## References
 
-## App Structure
-
-This app is structuresd as follows
-
-<pre>
-FastAPIStarter
-|-- app
-|    |- api
-|    |- dependencies
-|    |- models
-|    |- repositories
-|    |- schemas
-|    |- services
-|    |- static
-|    |- templates
-|    |- utilities
-|    |- views
-|-- tests/
-|-- .env
-|-- pyptoject.toml
-|-- README.md
-</pre>
-
-#### App Structure info
-
-##### Main folders
-`app` This folder contains all of our application code.
-
-`tests` This contains the tests (unit tests, integration tests, etc) for the application.
-
-##### Folders inside App
-`api` This folder contains the endpoints (route fucntions) of our app.
-
-`dependencies` This folder contains the functions that we'd usually use for dependency injection e.g. getting the information of the user who's performing the request, getting a reference to the database, etc
-
-`models` This folder contains the Pydantic / SQLModel / SQLAlchemy models that eventually become database tables. Note that the files in here are strictly those that become database tables. The other models used for request and response validation go in the `schemas` folder
-
-`repositories` files in this folder are used to query the datastore, which depending on the app can be a file, database, another api, etc. Usually though, it's our database.
-
-`services` The business logic of the application lives here.
-
-`schemas` files in this folder specify pydantic / sqlmodel classes that are used for data validation only and *NOT* models that become database tables.
-
-`utilities` This contain generic helper functions
-
-`static` this contains folders that contain css, js, img and other assets we may need when this app is responsible for rendering of the frontend UI>
-
-`templates` this contains our jinja2 templates
-
-`views` this contains the route functions used for when this app is responsible for rendering the frontnend UI
-
-> This application reads configuration from `.env` before launching. The preconfigured values allow local development with sqlite and should be changed for production. For additional variables, check `config.py`.
-
-### Ascend ExerciseDB Integration
-
-This project can optionally use Ascend ExerciseDB (RapidAPI) for external exercise search, previews, and workout remix alternatives.
-
-Add these variables to your `.env`:
-
-```
-ASCEND_RAPIDAPI_KEY="your-rapidapi-key"
-ASCEND_RAPIDAPI_HOST="edb-with-videos-and-images-by-ascendapi.p.rapidapi.com"
-```
-
-When `ASCEND_RAPIDAPI_KEY` is not set, local API flows still work and external-search routes gracefully fall back to local workout data.
-
-### Added API Endpoints
-
-- `GET /api/workouts/external/search`
-- `GET /api/workouts/external/{exercise_id}`
-- `GET /api/workouts/external/{exercise_id}/preview.gif`
-- `GET /api/workouts/{workout_id}/alternatives`
-- `GET /api/routines/list`
-- `POST /api/routines`
-- `GET /api/routines/{routine_id}`
-- `PATCH /api/routines/{routine_id}`
-- `DELETE /api/routines/{routine_id}`
-- `POST /api/routines/{routine_id}/workouts`
-- `POST /api/routines/{routine_id}/workouts/external`
-- `PATCH /api/routines/{routine_id}/workouts/{routine_workout_id}`
-- `DELETE /api/routines/{routine_id}/workouts/{routine_workout_id}`
-
-
-## Using this in production
-
-
-If you so ever choose to use this template for your own projects, please consider the following:
-
-1. You **WILL** need to modify the default configuration to 
-    - Use a database that's more suitable for production. 
-    - Change the default secret
-    - Change the default environment
-2. You may need to tweak additional settings in the `config.py` file for scalability
-3. You'd need to look into a database migration / upgrade tool like alembic
-4. You may want to dockerize the application for easier deployment
-5. You may want to switch from storing cookies in localstorage to only cookies depending on your security needs.
+- AscendAPI https://ascendapi.com/
+- FastAPI https://fastapi.tiangolo.com/
